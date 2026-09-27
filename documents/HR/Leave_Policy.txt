@@ -1,0 +1,21 @@
+Company Leave Policy
+
+Policy ID: HR-2026-04
+Department: HR
+Access Level: Employee, Manager, HR
+
+1. Annual Leave
+Employees are entitled to 24 days of annual leave per calendar year.
+
+2. Sick Leave
+Employees may apply for sick leave when they are unable to work due to illness.
+
+3. Leave Approval
+Planned leave should be submitted to the reporting manager at least 3 working days in advance.
+
+4. Emergency Leave
+Emergency leave may be requested when advance notice is not possible.
+
+5. Policy Version
+Version: 1.0
+Effective Date: January 2026
