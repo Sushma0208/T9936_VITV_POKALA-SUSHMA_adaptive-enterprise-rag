@@ -1,0 +1,58 @@
+[
+  {
+    "id": "Q1",
+    "question": "How many days of annual leave are employees entitled to?",
+    "expected_source": "Leave_Policy.txt",
+    "expected_roles": ["Employee", "Manager", "HR"],
+    "type": "exact"
+  },
+  {
+    "id": "Q2",
+    "question": "How many days can employees work from home?",
+    "expected_source": "WFH_Policy.txt",
+    "expected_roles": ["Employee", "Manager", "HR"],
+    "type": "exact"
+  },
+  {
+    "id": "Q3",
+    "question": "What are the requirements for employee passwords?",
+    "expected_source": "Password_Policy.txt",
+    "expected_roles": ["Employee", "Manager", "HR"],
+    "type": "exact"
+  },
+  {
+    "id": "Q4",
+    "question": "What risks are associated with using personal devices?",
+    "expected_source": "byod-policy.pdf",
+    "expected_roles": ["Employee", "Manager", "HR", "IT"],
+    "type": "public"
+  },
+  {
+    "id": "Q5",
+    "question": "What rules apply to acceptable use of IT systems?",
+    "expected_source": "it-acceptable-use-policy.pdf",
+    "expected_roles": ["Employee", "Manager", "HR", "IT"],
+    "type": "public"
+  },
+  {
+    "id": "Q6",
+    "question": "What does the information security policy say about protecting information?",
+    "expected_source": "information-security-policy.pdf",
+    "expected_roles": ["Employee", "Manager", "HR", "IT"],
+    "type": "public"
+  },
+  {
+    "id": "Q7",
+    "question": "What are the rules for mobile devices?",
+    "expected_source": "mobile-device-policy.pdf",
+    "expected_roles": ["Employee", "Manager", "HR", "IT"],
+    "type": "public"
+  },
+  {
+    "id": "Q8",
+    "question": "What should employees do when using email?",
+    "expected_source": "email.pdf",
+    "expected_roles": ["Employee", "Manager", "HR", "IT"],
+    "type": "public"
+  }
+]

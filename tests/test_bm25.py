@@ -26,6 +26,6 @@ for i, result in enumerate(results, start=1):
     print("Result:", i)
     print("Score:", round(result["score"], 4))
     print("Source:", document["source"])
-    print("Department:", document["department"])
+    print("Organization:", document["organization"])
     print("Text:")
     print(document["text"])

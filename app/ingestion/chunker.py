@@ -1,78 +1,45 @@
-from typing import List, Dict
-
-
 def chunk_documents(
-    documents: List[Dict],
-    chunk_size: int = 500,
-    chunk_overlap: int = 100
-) -> List[Dict]:
-    """
-    Split documents into meaningful overlapping chunks.
-
-    The chunker tries to preserve complete paragraphs/sections
-    instead of cutting words in the middle.
-
-    Args:
-        documents: Loaded documents with metadata.
-        chunk_size: Maximum approximate characters per chunk.
-        chunk_overlap: Approximate overlap between chunks.
-
-    Returns:
-        List of chunks with preserved metadata.
-    """
-
+    documents,
+    chunk_size=500,
+    overlap=100,
+    chunk_overlap=None
+):
+    if chunk_overlap is not None:
+        overlap = chunk_overlap
     chunks = []
 
     for document in documents:
+        text = document["text"].strip()
 
-        # Split using blank lines so that sections remain meaningful
-        paragraphs = [
-            paragraph.strip()
-            for paragraph in document["text"].split("\n\n")
-            if paragraph.strip()
-        ]
+        if not text:
+            continue
 
-        current_chunk = ""
+        start = 0
         chunk_id = 0
 
-        for paragraph in paragraphs:
+        while start < len(text):
 
-            # If adding the next paragraph stays within the limit
-            if len(current_chunk) + len(paragraph) + 2 <= chunk_size:
+            end = start + chunk_size
+            chunk_text = text[start:end]
 
-                if current_chunk:
-                    current_chunk += "\n\n"
+            chunk = {
+                "text": chunk_text,
+                "source": document["source"],
+                "organization": document["organization"],
+                "document_type": document.get("document_type", "Unknown"),
+                "file_type": document["file_type"],
+                "page_number": document["page_number"],
+                "allowed_roles": document.get("allowed_roles", []),
+                "access_type": document.get("access_type", "restricted"),
+                "chunk_id": chunk_id,
+            }
 
-                current_chunk += paragraph
+            chunks.append(chunk)
 
-            else:
-                # Store the current chunk
-                if current_chunk:
-                    chunks.append(
-                        {
-                            "chunk_id": chunk_id,
-                            "text": current_chunk,
-                            "source": document["source"],
-                            "department": document["department"],
-                            "allowed_roles": document["allowed_roles"],
-                        }
-                    )
+            if end >= len(text):
+                break
 
-                    chunk_id += 1
-
-                # Start a new chunk
-                current_chunk = paragraph
-
-        # Store the final chunk
-        if current_chunk:
-            chunks.append(
-                {
-                    "chunk_id": chunk_id,
-                    "text": current_chunk,
-                    "source": document["source"],
-                    "department": document["department"],
-                    "allowed_roles": document["allowed_roles"],
-                }
-            )
+            start = end - overlap
+            chunk_id += 1
 
     return chunks

@@ -28,7 +28,7 @@ def test_it_user_cannot_access_hr_wfh():
         print(
             result["document"]["source"],
             "->",
-            result["document"]["department"]
+            result["document"]["organization"]
         )
 
     # IT user must not receive the HR WFH document
@@ -57,7 +57,7 @@ def test_employee_can_access_hr_wfh():
         print(
             result["document"]["source"],
             "->",
-            result["document"]["department"]
+            result["document"]["organization"]
         )
 
     sources = [

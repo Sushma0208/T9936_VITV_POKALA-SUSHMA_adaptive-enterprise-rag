@@ -1,0 +1,67 @@
+{
+  "KCL/byod-policy.pdf": {
+    "organization": "KCL",
+    "document_type": "BYOD Policy",
+    "access_type": "public"
+  },
+
+  "KCL/information-security-policy.pdf": {
+    "organization": "KCL",
+    "document_type": "Information Security Policy",
+    "access_type": "public"
+  },
+
+  "KCL/it-acceptable-use-policy.pdf": {
+    "organization": "KCL",
+    "document_type": "IT Acceptable Use Policy",
+    "access_type": "public"
+  },
+
+  "KCL/mobile-device-policy.pdf": {
+    "organization": "KCL",
+    "document_type": "Mobile Device Policy",
+    "access_type": "public"
+  },
+
+  "UCL/information-security-policy.pdf": {
+    "organization": "UCL",
+    "document_type": "Information Security Policy",
+    "access_type": "public"
+  },
+
+  "UCL/connection.pdf": {
+    "organization": "UCL",
+    "document_type": "Connection Policy",
+    "access_type": "public"
+  },
+
+  "UCL/data-access-policy-public.pdf": {
+    "organization": "UCL",
+    "document_type": "Data Access Policy",
+    "access_type": "public"
+  },
+
+  "UCL/email.pdf": {
+    "organization": "UCL",
+    "document_type": "Email Policy",
+    "access_type": "public"
+  },
+
+  "UCL/environmental.pdf": {
+    "organization": "UCL",
+    "document_type": "Environmental Policy",
+    "access_type": "public"
+  },
+
+  "UCL/monitoring.pdf": {
+    "organization": "UCL",
+    "document_type": "Monitoring Policy",
+    "access_type": "public"
+  },
+
+  "UCL/regulations.pdf": {
+    "organization": "UCL",
+    "document_type": "Computing Regulations",
+    "access_type": "public"
+  }
+}

@@ -2,17 +2,17 @@ def build_rag_prompt(question, retrieved_documents):
     evidence = []
 
     for result in retrieved_documents:
+
         document = result["document"]
 
-        evidence.append(
-            f"""
+        evidence.append(f"""
 Source: {document["source"]}
-Department: {document["department"]}
+Organization: {document.get("organization", "Unknown")}
+Page: {document.get("page_number", "N/A")}
 
 Content:
 {document["text"]}
-"""
-        )
+""")
 
     context = "\n".join(evidence)
 

@@ -34,7 +34,7 @@ def test_hybrid_search():
         print("BM25 Score:", round(result["bm25_score"], 4))
         print("Vector Score:", round(result["vector_score"], 4))
         print("Source:", document["source"])
-        print("Department:", document["department"])
+        print("Organization:", document["organization"])
         print("Text:", document["text"][:250])
 
     assert len(results) > 0

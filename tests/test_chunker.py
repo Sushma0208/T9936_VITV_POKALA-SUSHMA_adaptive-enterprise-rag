@@ -17,7 +17,7 @@ for chunk in chunks:
     print("\n==============================")
     print("Chunk ID:", chunk["chunk_id"])
     print("Source:", chunk["source"])
-    print("Department:", chunk["department"])
+    print("Organization:", chunk["organization"])
     print("Allowed Roles:", chunk["allowed_roles"])
     print("Chunk Text:")
     print(chunk["text"])

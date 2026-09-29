@@ -51,7 +51,7 @@ def test_vector_search_with_ollama():
         print(f"\nResult {i}")
         print("Score:", round(result["score"], 4))
         print("Source:", document["source"])
-        print("Department:", document["department"])
+        print("Organization:", document["organization"])
         print("Text:", document["text"][:300])
 
     assert len(results) > 0
