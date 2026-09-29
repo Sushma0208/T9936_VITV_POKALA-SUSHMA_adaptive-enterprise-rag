@@ -1,9 +1,5 @@
+import requests
 import streamlit as st
-
-from app.ingestion.loader import load_text_documents
-from app.ingestion.chunker import chunk_documents
-from app.retrieval.bm25_search import BM25Search
-from app.retrieval.role_filter import filter_by_role
 
 
 # ============================================================
@@ -17,27 +13,7 @@ st.set_page_config(
 )
 
 
-# ============================================================
-# LOAD DOCUMENTS
-# ============================================================
-
-@st.cache_resource
-def initialize_retrieval():
-
-    documents = load_text_documents()
-
-    chunks = chunk_documents(
-        documents,
-        chunk_size=500,
-        chunk_overlap=100
-    )
-
-    search_engine = BM25Search(chunks)
-
-    return documents, chunks, search_engine
-
-
-documents, chunks, search_engine = initialize_retrieval()
+API_URL = "http://localhost:8000"
 
 
 # ============================================================
@@ -48,7 +24,7 @@ st.title("🤖 Adaptive Enterprise Knowledge Assistant")
 
 st.markdown(
     "**Hybrid RAG • Role-Aware Retrieval • "
-    "Hallucination Detection**"
+    "Evidence-Based Hallucination Detection**"
 )
 
 st.divider()
@@ -77,16 +53,11 @@ with st.sidebar:
 
     st.subheader("📊 System Status")
 
-    st.success("✓ Document Loading")
-    st.success("✓ Metadata Extraction")
-    st.success("✓ Document Chunking")
-    st.success("✓ BM25 Retrieval")
-    st.success("✓ Role Filtering")
-
-    st.warning("⏳ Vector Search")
-    st.warning("⏳ Hybrid RAG")
-    st.warning("⏳ Ollama LLM")
-    st.warning("⏳ Hallucination Detection")
+    st.success("✓ FastAPI Backend")
+    st.success("✓ Hybrid Retrieval")
+    st.success("✓ Role-Aware Filtering")
+    st.success("✓ Ollama LLM")
+    st.success("✓ Evidence Verification")
 
     st.divider()
 
@@ -102,26 +73,26 @@ col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     st.metric(
-        "Documents",
-        len(documents)
+        "Retrieval",
+        "Hybrid"
     )
 
 with col2:
     st.metric(
-        "Chunks",
-        len(chunks)
+        "LLM",
+        "Llama 3.2"
     )
 
 with col3:
     st.metric(
-        "User Role",
-        user_role
+        "Embedding",
+        "Nomic"
     )
 
 with col4:
     st.metric(
-        "Retrieval",
-        "BM25"
+        "User Role",
+        user_role
     )
 
 
@@ -129,26 +100,27 @@ st.divider()
 
 
 # ============================================================
-# QUESTION
+# QUESTION INPUT
 # ============================================================
 
 st.subheader("🔎 Ask the Enterprise Assistant")
 
-query = st.text_input(
+query = st.text_area(
     "Enter your question",
     placeholder=(
         "Example: How many days can employees "
         "work from home?"
-    )
+    ),
+    height=100
 )
 
 
 # ============================================================
-# SEARCH
+# ASK ASSISTANT
 # ============================================================
 
 if st.button(
-    "Search",
+    "🤖 Ask Assistant",
     type="primary",
     use_container_width=True
 ):
@@ -161,205 +133,245 @@ if st.button(
 
     else:
 
-        # ----------------------------------------------------
-        # STEP 1: BM25 RETRIEVAL
-        # ----------------------------------------------------
+        with st.spinner(
+            "Searching enterprise knowledge..."
+        ):
 
-        raw_results = search_engine.search(
-            query,
-            top_k=5
+            try:
+
+                response = requests.post(
+                    f"{API_URL}/query",
+                    json={
+                        "question": query,
+                        "user_role": user_role
+                    },
+                    timeout=180
+                )
+
+                response.raise_for_status()
+
+                result = response.json()
+
+            except requests.exceptions.RequestException as error:
+
+                st.error(
+                    "Unable to connect to the FastAPI backend."
+                )
+
+                st.code(str(error))
+
+                st.stop()
+
+
+        # ====================================================
+        # ANSWER
+        # ====================================================
+
+        st.subheader("💬 Answer")
+
+        answer = result.get(
+            "answer",
+            "No answer returned."
+        )
+
+        if answer == (
+            "Insufficient evidence in the available documents."
+        ):
+
+            st.warning(answer)
+
+        else:
+
+            st.success(answer)
+
+
+        # ====================================================
+        # VERIFICATION
+        # ====================================================
+
+        verification = result.get(
+            "verification",
+            {}
+        )
+
+        supported = verification.get(
+            "supported",
+            False
+        )
+
+        confidence = verification.get(
+            "confidence",
+            0.0
+        )
+
+        reason = verification.get(
+            "reason",
+            "No verification information available."
         )
 
 
-        # ----------------------------------------------------
-        # STEP 2: ROLE FILTERING
-        # ----------------------------------------------------
+        st.subheader("🛡️ Evidence Verification")
 
-        filtered_results = filter_by_role(
-            raw_results,
-            user_role
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            if supported:
+
+                st.success(
+                    "✓ Evidence Supported"
+                )
+
+            else:
+
+                st.error(
+                    "✗ Evidence Not Supported"
+                )
+
+        with col2:
+
+            st.metric(
+                "Confidence",
+                f"{confidence * 100:.1f}%"
+            )
+
+        st.caption(
+            f"Verification: {reason}"
         )
 
 
-        # ----------------------------------------------------
-        # RESULTS
-        # ----------------------------------------------------
+        # ====================================================
+        # SOURCES
+        # ====================================================
 
-        st.subheader(
-            "📄 Retrieved Evidence"
+        st.subheader("📚 Retrieved Sources")
+
+        sources = result.get(
+            "sources",
+            []
         )
 
+        if not sources:
 
-        if not filtered_results:
-
-            st.error(
-                "No authorized documents were found "
-                "for this question and user role."
+            st.info(
+                "No authorized sources were retrieved."
             )
 
         else:
 
-            # ------------------------------------------------
-            # SHOW TOP RESULTS
-            # ------------------------------------------------
-
-            for i, result in enumerate(
-                filtered_results,
+            for index, source in enumerate(
+                sources,
                 start=1
             ):
 
-                document = result["document"]
-
-                st.markdown(
-                    f"### Result {i}"
+                document = source.get(
+                    "document",
+                    {}
                 )
 
-                col1, col2, col3 = st.columns(3)
-
-                with col1:
-
-                    st.write(
-                        f"**Source:** "
-                        f"{document['source']}"
-                    )
-
-                with col2:
-
-                    st.write(
-                        f"**Department:** "
-                        f"{document['department']}"
-                    )
-
-                with col3:
-
-                    st.write(
-                        f"**Score:** "
-                        f"{result['score']:.4f}"
-                    )
-
-
-                st.write(
-                    f"**Allowed Roles:** "
-                    f"{', '.join(document['allowed_roles'])}"
+                source_name = document.get(
+                    "source",
+                    "Unknown"
                 )
 
-
-                st.info(
-                    document["text"]
+                organization = document.get(
+                    "organization",
+                    "Unknown"
                 )
 
+                document_type = document.get(
+                    "document_type",
+                    "Unknown"
+                )
 
-                st.divider()
+                page_number = document.get(
+                    "page_number",
+                    "N/A"
+                )
 
+                access_type = document.get(
+                    "access_type",
+                    "Unknown"
+                )
 
-            # ------------------------------------------------
-            # ACCESS STATUS
-            # ------------------------------------------------
+                score = source.get(
+                    "score",
+                    0.0
+                )
 
-            st.subheader(
-                "🔐 Access Control"
-            )
+                with st.expander(
+                    f"{index}. {organization} — "
+                    f"{document_type}"
+                ):
 
-            st.success(
-                f"Results filtered for authorized role: "
-                f"**{user_role}**"
-            )
+                    col1, col2, col3 = st.columns(3)
+
+                    with col1:
+
+                        st.write(
+                            f"**Source:** {source_name}"
+                        )
+
+                    with col2:
+
+                        st.write(
+                            f"**Page:** {page_number}"
+                        )
+
+                    with col3:
+
+                        st.write(
+                            f"**Hybrid Score:** "
+                            f"{score:.4f}"
+                        )
+
+                    st.write(
+                        f"**Access:** {access_type}"
+                    )
+
+                    st.info(
+                        document.get(
+                            "text",
+                            ""
+                        )
+                    )
 
 
 # ============================================================
-# CURRENT PIPELINE
+# ARCHITECTURE
 # ============================================================
 
 st.divider()
 
-st.subheader(
-    "⚙️ Current Implementation Pipeline"
-)
+st.subheader("🏗️ System Architecture")
 
 st.code(
 """
 Enterprise Documents
         ↓
-Document Loader                 ✓
+Document Processing
         ↓
-Metadata Extraction             ✓
-        ↓
-Document Chunking               ✓
-        ↓
-BM25 Keyword Retrieval          ✓
-        ↓
-Role-Based Filtering            ✓
-        ↓
-Vector Retrieval                ⏳
-        ↓
-Hybrid RAG                      ⏳
-        ↓
-Local LLM / Ollama              ⏳
-        ↓
-Hallucination Detection         ⏳
-        ↓
-Answer + Citation + Confidence
+Hybrid Retrieval
+   ↙           ↘
+BM25         Vector
+   ↘           ↙
+    Result Fusion
+          ↓
+   Role-Based Filter
+          ↓
+       Reranking
+          ↓
+         LLM
+          ↓
+ Evidence Verification
+     ↙           ↘
+Supported      Unsupported
+     ↓             ↓
+Answer +       Insufficient
+Sources        Evidence
 """,
     language="text"
 )
-
-
-# ============================================================
-# METHODOLOGY PLAN
-# ============================================================
-
-st.divider()
-
-st.subheader(
-    "📌 Methodology Plan"
-)
-
-col1, col2 = st.columns(2)
-
-with col1:
-
-    st.markdown(
-"""
-### Phase 1 — Data Preparation
-
-✓ Document collection  
-✓ Text extraction  
-✓ Metadata extraction  
-✓ Chunking  
-
-### Phase 2 — Retrieval
-
-✓ BM25  
-⏳ Embeddings  
-⏳ FAISS  
-⏳ Hybrid retrieval  
-⏳ Reranking
-"""
-    )
-
-
-with col2:
-
-    st.markdown(
-"""
-### Phase 3 — Generation
-
-⏳ Local LLM / Ollama  
-⏳ Context-aware answer generation  
-
-### Phase 4 — Verification
-
-⏳ Evidence verification  
-⏳ Hallucination detection  
-⏳ Confidence scoring  
-
-### Phase 5 — Deployment
-
-⏳ FastAPI  
-⏳ Docker  
-⏳ GitHub Actions CI/CD
-"""
-    )
 
 
 # ============================================================
